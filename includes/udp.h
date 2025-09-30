@@ -8,6 +8,6 @@
 #define PORT     5354
 #define MAX_LINE 1024
 
-int init_udp();
+int init_udp_socket();
 
 #endif

@@ -5,13 +5,15 @@
 #include <string>
 #include <iostream>
 #include "includes/rolldice.h"
+#include "uuid_v4.h"
+#include "uuid.h"
 
-enum QueryType { UUID, ULID, ROLL_DICE, UNKNOWN };
+enum QueryType { UUID, COIN_TOSS, ROLL_DICE, UNKNOWN };
 
 QueryType getQueryType(const std::string &q) {
-    if (q == "uuid") return UUID;
-    if (q == "ulid") return ULID;
+    if (q == "cointoss") return COIN_TOSS;
     if (q == "rolldice") return ROLL_DICE;
+    if (q == "uuid") return UUID;
     return UNKNOWN;
 }
 
@@ -30,19 +32,19 @@ std::pair<std::string, int> split_at_dot(const std::string &input) {
 }
 
 
-
 std::string process(const uint16_t id, const std::string &query) {
     std::cout << "id: " << id << ", query: " << query << std::endl;
     // auto [q, count] = split_at_dot(query);
 
     switch (getQueryType(query)) {
-        case UUID:
-            break;
-        case ULID:
-            std::cout << "It's a Ulid!" << std::endl;
-            break;
         case ROLL_DICE: {
             return roll_dice();
+        }
+        case COIN_TOSS: {
+            return (random() % 2 == 0) ? "Heads" : "Tails";
+        }
+        case UUID: {
+            return generateUUID();
         }
         default:
             std::cout << "Unknown case" << std::endl;

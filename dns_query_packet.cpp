@@ -1,14 +1,12 @@
 //
-// Created by arjun on 28/09/25.
+// Created by arjun on 29/09/25.
 //
 
 #include <netinet/in.h>
-
 #include "includes/dns.h"
 
 using namespace std;
 
-// https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.2
 pair<string, size_t> qname_to_string(const char *buffer, size_t pos) {
     string name;
     const size_t start = pos;
@@ -22,115 +20,45 @@ pair<string, size_t> qname_to_string(const char *buffer, size_t pos) {
     return {name, pos - start};
 }
 
-bool parse_dns_message(const char *buffer, size_t buffer_size, dns_message &message) {
+// https://datatracker.ietf.org/doc/html/rfc1035#section-4.1
+
+bool parse_dns_query_packet(const char *query_buffer, dns_message &message) {
     try {
         size_t pos = 0;
 
-        message.header.id = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        // https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.1
+
+        message.header.id = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
-        message.header.flags = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        message.header.flags = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
-        message.header.qd_count = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        message.header.qd_count = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
-        message.header.an_count = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        message.header.an_count = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
-        message.header.ns_count = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        message.header.ns_count = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
-        message.header.ar_count = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+        message.header.ar_count = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         pos += 2;
 
+        // https://datatracker.ietf.org/doc/html/rfc1035#section-4.1.2
+
         if (message.header.qd_count > 0) {
-            auto [domain, qname_len] = qname_to_string(buffer, pos);
+            auto [domain, qname_len] = qname_to_string(query_buffer, pos);
             message.question.q_name = domain;
             pos += qname_len;
-            message.question.q_type = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+            message.question.q_type = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
             pos += 2;
-            message.question.q_class = ntohs(*reinterpret_cast<const uint16_t *>(buffer + pos));
+            message.question.q_class = ntohs(*reinterpret_cast<const uint16_t *>(query_buffer + pos));
         }
 
         return true;
-    } catch (const runtime_error &e) {
-        cout << "Bytes received: " << buffer_size << endl;
-        cout << "Caught an exception: " << e.what() << endl;
+    } catch (...) {
         return false;
     }
 }
 
-vector<uint8_t> build_response(const char *buffer, const string &answer_text) {
-    vector<uint8_t> response;
-
-    // --- Copy ID ---
-    response.push_back(buffer[0]);
-    response.push_back(buffer[1]);
-
-    // --- Flags: standard response, no error ---
-    response.push_back(0x81);
-    response.push_back(0x80);
-
-    // QDCOUNT = 1
-    response.push_back(0x00);
-    response.push_back(0x01);
-
-    // ANCOUNT = 1
-    response.push_back(0x00);
-    response.push_back(0x01);
-
-    // NSCOUNT = 0
-    response.push_back(0x00);
-    response.push_back(0x00);
-
-    // ARCOUNT = 0
-    response.push_back(0x00);
-    response.push_back(0x00);
-
-    // --- Copy Question section ---
-    size_t pos = 12;
-    while (buffer[pos] != 0) {
-        response.push_back(buffer[pos]);
-        pos++;
-    }
-    response.push_back(0); // null byte
-    pos++;
-
-    // QTYPE and QCLASS
-    response.push_back(buffer[pos++]);
-    response.push_back(buffer[pos++]);
-    response.push_back(buffer[pos++]);
-    response.push_back(buffer[pos++]);
-
-    // --- Answer section ---
-    // Name: pointer to question at offset 12
-    response.push_back(0xC0);
-    response.push_back(0x0C);
-
-    // TYPE = TXT (0x0010)
-    response.push_back(0x00);
-    response.push_back(0x10);
-
-    // CLASS = IN (0x0001)
-    response.push_back(0x00);
-    response.push_back(0x01);
-
-    // TTL = 3600 seconds
-    response.push_back(0x00);
-    response.push_back(0x00);
-    response.push_back(0x0E);
-    response.push_back(0x10);
-
-    // RDATA = length-prefixed text
-    uint8_t text_len = answer_text.size();   // length byte
-    response.push_back(0x00);               // RDLENGTH high byte
-    response.push_back(text_len + 1);       // RDLENGTH low byte = 1 (length) + text
-
-    response.push_back(text_len);           // length byte for TXT
-    for (char c : answer_text) {
-        response.push_back(c);              // text bytes
-    }
-
-    return response;
-}
-
-void print_dns_message(const dns_message &message) {
+void console_dns_packet(const dns_message &message) {
     cout << "header:\n";
     cout << "  id: " << message.header.id << "\n";
 

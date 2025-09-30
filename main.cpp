@@ -8,7 +8,7 @@
 using namespace std;
 
 int main() {
-    if (!init_udp()) {
+    if (!init_udp_socket()) {
         return -1;
     };
     return 0;

@@ -1,0 +1,6 @@
+[submodule "uuid_v4"]
+	path = uuid_v4
+	url = https://github.com/crashoz/uuid_v4.git
+[submodule "external/uuid_v4"]
+	path = external/uuid_v4
+	url = https://github.com/crashoz/uuid_v4.git

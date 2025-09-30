@@ -9,12 +9,13 @@
 #include <cstring>
 #include <unistd.h>
 #include "includes/dns.h"
-#include "includes/dns_parser.h"
 #include "includes/dns_processor.h"
+#include "includes/dns_query_packet.h"
+#include "includes/dns_response_packet.h"
 
 using namespace std;
 
-int init_udp() {
+int init_udp_socket() {
     int sockfd;
     char buffer[MAX_LINE];
     sockaddr_in server_addr, client_addr;
@@ -51,18 +52,14 @@ int init_udp() {
 
         dns_message message;
 
-        cout << "Received " << bytes_received << " bytes" << endl;
-        if (parse_dns_message(buffer, bytes_received, message)) {
-            // For debug uncomment
-            // print_dns_message(message);
-
-            // Is dns packet is query packet 0 means query, 1 means response
+        // cout << "Received " << bytes_received << " bytes" << endl;
+        if (parse_dns_query_packet(buffer, message)) {
             uint16_t qr = (message.header.flags >> 15) & 0x1;
             if (!qr) {
                 string answer = process(message.header.id, message.question.q_name);
-                vector<uint8_t> response = build_response(buffer, answer);
+                vector<uint8_t> response_packet = build_response_packet(buffer, answer);
 
-                ssize_t sent = sendto(sockfd, response.data(), response.size(), 0,
+                ssize_t sent = sendto(sockfd, response_packet.data(), response_packet.size(), 0,
                                       reinterpret_cast<struct sockaddr *>(&client_addr), client_len);
                 if (sent < 0) {
                     cerr << "Error sending response." << endl;
