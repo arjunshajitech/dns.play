@@ -35,15 +35,9 @@
     }
 
     .logo-section img {
-        max-width: 400px;
+        width: 100%;
         height: auto;
         border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        transition: transform 0.3s ease;
-    }
-
-    .logo-section img:hover {
-        transform: scale(1.05);
     }
 
     .description {
