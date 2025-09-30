@@ -1,4 +1,7 @@
-`dns.play` is a DNS server that plays around with the usual rules, offering handy tools and fun services you can use right from the command line.
+![Banner](public/banner.png)
+
+
+dns.play is a DNS server that plays around with the usual rules, offering handy tools and fun services you can use right from the command line.
 ##### Sample commands
 
 ```
