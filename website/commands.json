@@ -1,0 +1,27 @@
+[
+  {
+    "name": "UUID",
+    "desc": "Generate a unique identifier using the UUID service.",
+    "code": "dig uuid @dnsplay.fun"
+  },
+  {
+    "name": "ULID",
+    "desc": "Generate a unique identifier using the ULID service.",
+    "code": "dig ulid @dnsplay.fun"
+  },
+  {
+    "name": "Unix Time",
+    "desc": "Convert a Unix timestamp to UTC.",
+    "code": "dig unix.1696060800 @dnsplay.fun"
+  },
+  {
+    "name": "Roll Dice",
+    "desc": "Simulate rolling a dice with this fun DNS-based utility.",
+    "code": "dig rolldice @dnsplay.fun"
+  },
+  {
+    "name": "Coin Toss",
+    "desc": "Flip a virtual coin to get heads or tails.",
+    "code": "dig cointoss @dnsplay.fun"
+  }
+]
