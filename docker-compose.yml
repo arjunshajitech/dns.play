@@ -1,0 +1,7 @@
+services:
+  dnsplay:
+    image: dnsplay:latest
+    container_name: dnsplay
+    ports:
+      - "5354:5354/udp"
+    restart: always
