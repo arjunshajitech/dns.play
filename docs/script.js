@@ -14,10 +14,22 @@ async function loadCommands() {
                     `;
             container.appendChild(div);
         });
+
+         fetch('https://api.github.com/repos/arjunshajitech/dns.play')
+        .then(response => response.json())
+        .then(data => {
+        const stars = data.stargazers_count;
+        document.getElementById('github-star-count').innerText = `Star on GitHub (${stars}) `;
+    })
+    .catch(error => {
+      console.error('Error fetching star count:', error);
+      document.getElementById('github-star-count').innerText = 'Star on GitHub';
+    });
     } catch (err) {
         console.error('Error loading commands:', err);
     }
 }
+
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
